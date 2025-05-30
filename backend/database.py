@@ -18,7 +18,7 @@ class Task(Base):
     completed: Mapped[bool] = mapped_column(Boolean, default=False)
 
     @staticmethod
-    def to_camel_case(s: str) -> str:
+    def __to_camel_case(s: str) -> str:
         words = s.split(' ')
         return words[0].lower() + ''.join(word.capitalize() for word in words[1:])
 
@@ -28,14 +28,10 @@ class Task(Base):
             tasks = session.execute(select(cls)).scalars().all()
             return [{
                 "id": task.id,
-                "title": cls.to_camel_case(task.title),
+                "title": cls.__to_camel_case(task.title),
                 "completed": task.completed
             } for task in tasks]
-        # with session_factory() as session:
-        #     query = select(cls)
-        #     result = session.execute(query).scalars().all()
-        #     return result
-        
+
     @classmethod
     def create_task(cls, title: str):
         with session_factory() as session:
@@ -43,3 +39,14 @@ class Task(Base):
             session.add(task)
             session.commit()
             return task
+
+
+    @classmethod
+    def delete_note_by_id(cls, id: int):
+        with session_factory() as session:
+            task = session.get(cls, id)
+            if task:
+                session.delete(task)
+                session.commit()
+                return True
+            return False

@@ -22,3 +22,15 @@ def create_task(task: Task):
     data = {"message": f"Новая задача {task.title} создана"}
 
     return data
+
+
+@router.delete("/tasks/{id}")
+def delete_task(id: int):
+    """Удалить задачу по идентификатору."""
+    try:
+        TaskModel.delete_note_by_id(id)
+        data = {"message": f"Задача с идентификатором {id} удалена"}
+    except Exception as e:
+        data = {"error": str(e)}
+
+    return data
