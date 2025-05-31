@@ -83,43 +83,64 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="tasks-container">
-        <h2>Tasks</h2>
+    <div class="max-w-[1200px] mx-auto p-2 sm:p-4 w-full">
+        <section class="py-4">
+            <h2 class="font-stretch-semi-expanded font-extrabold from-neutral-950 text-3xl sm:text-4xl md:text-5xl text-center">
+                Текущие задачи
+            </h2>
+        </section>
 
-        <form @submit.prevent="createTask" class="task-form">
-            <input
-                v-model="newTaskTitle"
-                type="text"
-                placeholder="Заголовок задачи"
-                :disabled="isSubmitting"
-                class="task-input"
-            />
-            <button
-                type="submit"
-                :disabled="isSubmitting || !newTaskTitle.trim()"
-                class="task-submit"
-            >
-                {{ isSubmitting ? "Добавление..." : "Добавить" }}
-            </button>
-        </form>
-        <h1 class="text-3xl font-bold underline text-blue-500">Hello world!</h1>
-        <div v-if="loading" class="loading-message">Loading tasks...</div>
+        <section class="py-4">
+            <div class="flex flex-col items-center gap-4">
+                <div class="w-full max-w-[400px]">
+                    <input
+                        v-model="newTaskTitle"
+                        type="text"
+                        placeholder="Заголовок задачи"
+                        :disabled="isSubmitting"
+                        class="w-full py-2 px-4 border border-gray-300 rounded-md text-sm sm:text-base focus:outline-none focus:border-gray-400 text-center placeholder:text-center"
+                    />
+                </div>
+                <button
+                    @click="createTask"
+                    :disabled="isSubmitting || !newTaskTitle.trim()"
+                    class="px-4 sm:px-6 py-2 bg-green-600 text-white border-none rounded-md cursor-pointer text-sm sm:text-base transition-colors hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                >
+                    {{ isSubmitting ? "Добавление..." : "Добавить" }}
+                </button>
+            </div>
+        </section>
 
-        <div v-else-if="error" class="error-message">
+        <div v-if="loading" class="text-center p-4 sm:p-8 text-gray-500">Загрузка задач...</div>
+
+        <div v-else-if="error" class="text-red-300 text-center p-4">
             {{ error }}
         </div>
-        <div v-else-if="tasks.length === 0" class="no-tasks-message">No tasks found</div>
-        <div v-else class="tasks-list">
-            <div v-for="task in tasks" :key="task.id" class="task-item">
-                <div class="task-content">
-                    <h3>{{ task.title }}</h3>
-                    <div class="task-meta">
-                        <span :class="['status', task.completed ? 'completed' : '']">
-                            {{ task.completed }}
+        <div v-else-if="tasks.length === 0" class="text-red-300 text-center p-4">Задачи не найдены</div>
+        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 p-2 sm:p-4">
+            <div
+                v-for="task in tasks"
+                :key="task.id"
+                class="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 text-center w-full h-auto min-h-[180px] sm:min-h-[200px] flex flex-col justify-between"
+            >
+                <div class="h-full flex flex-col justify-between">
+                    <h3 class="mb-4 sm:mb-6 text-base sm:text-lg overflow-hidden text-ellipsis line-clamp-4">
+                        {{ task.title }}
+                    </h3>
+                    <div class="space-y-2">
+                        <span
+                            :class="[
+                                'inline-block px-2 py-1 rounded text-xs sm:text-sm w-full box-border bg-amber-50 text-amber-800',
+                                task.completed
+                                    ? 'inline-block px-2 py-1 rounded text-xs sm:text-sm w-full box-border bg-green-50 text-green-800'
+                                    : '',
+                            ]"
+                        >
+                            {{ task.completed ? 'Выполнено' : 'В процессе' }}
                         </span>
                         <button
                             @click="deleteTask(task.id)"
-                            class="delete-button"
+                            class="w-full px-3 py-1 bg-red-600 text-white border-none rounded cursor-pointer text-xs sm:text-sm transition-colors hover:bg-red-700"
                             title="Удалить задачу"
                         >
                             Удалить
@@ -132,171 +153,5 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.tasks-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 1rem;
-    width: 100%;
-}
-
-h2 {
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
-.task-form {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.task-input {
-    flex: 1;
-    padding: 0.5rem 1rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
-}
-
-.task-input:focus {
-    outline: none;
-    border-color: #999;
-}
-
-.task-submit {
-    padding: 0.5rem 1.5rem;
-    background: #4caf50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.2s;
-}
-
-.task-submit:hover:not(:disabled) {
-    background: #45a049;
-}
-
-.task-submit:disabled {
-    background: #cccccc;
-    cursor: not-allowed;
-}
-
-.tasks-list {
-    display: grid;
-    grid-template-columns: repeat(4, 280px);
-    gap: 1.5rem;
-    padding: 1rem;
-    justify-content: center;
-}
-
-.task-item {
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 1.5rem;
-    text-align: center;
-    width: 280px;
-    height: 200px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.task-content {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.task-content h3 {
-    margin: 0 0 1.5rem 0;
-    font-size: 1.2rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    -webkit-box-orient: vertical;
-}
-
-.task-meta {
-    margin-top: auto;
-}
-
-.status {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.875rem;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.status.completed {
-    background: #e6ffe6;
-    color: #006600;
-}
-
-.status:not(.completed) {
-    background: #fff3e6;
-    color: #cc6600;
-}
-
-.loading-message,
-.error-message,
-.no-tasks-message {
-    text-align: center;
-    padding: 2rem;
-    color: #666;
-}
-
-.error-message {
-    color: #dc2626;
-    background: #fee2e2;
-    border-radius: 0.5rem;
-}
-
-.delete-button {
-    margin-top: 0.5rem;
-    padding: 0.25rem 0.75rem;
-    background: #dc2626;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.875rem;
-    transition: background-color 0.2s;
-    width: 100%;
-}
-
-.delete-button:hover {
-    background: #b91c1c;
-}
-
-@media (max-width: 1200px) {
-    .tasks-list {
-        grid-template-columns: repeat(3, 280px);
-    }
-}
-
-@media (max-width: 992px) {
-    .tasks-list {
-        grid-template-columns: repeat(2, 280px);
-    }
-}
-
-@media (max-width: 768px) {
-    .tasks-list {
-        grid-template-columns: 280px;
-    }
-
-    .task-form {
-        flex-direction: column;
-    }
-}
+/* Удаляем стили h2, так как они теперь в Tailwind классах */
 </style>

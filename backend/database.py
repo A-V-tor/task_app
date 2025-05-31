@@ -20,7 +20,7 @@ class Task(Base):
     @staticmethod
     def __to_camel_case(s: str) -> str:
         words = s.split(' ')
-        return words[0].lower() + ''.join(word.capitalize() for word in words[1:])
+        return words[0].lower() + ''.join(f" {word.capitalize()}" for word in words[1:])
 
     @classmethod
     def fetch_all_tasks(cls):
